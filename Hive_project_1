@@ -72,9 +72,21 @@ select agent_name from AP group by agent_name having avg(tot_feedback) > 4.5;
 
 12. average weekly response time for each agent 
 
+select 
+agent_name, from_unixtime( cast(sum(unix_timestamp(avg_response,'HH:mm:ss'))/7 as bigint),'HH:mm:ss') 
+as avg_res from AP group by agent_name limit 10;
+
 
 13. average weekly resolution time for each agents 
+
+select 
+agent_name, from_unixtime( cast(sum(unix_timestamp(avg_resolution,'HH:mm:ss'))/7 as bigint),'HH:mm:ss') 
+as avg_res from AP group by agent_name limit 10;
+
 14. Find the number of chat on which they have received a feedback 
+
+select count(total_chats) from AP where tot_feedback > 0;
+
 15. Total contribution hour for each and every agents weekly basis 
 16. Perform inner join, left join and right join based on the agent column and after joining the table export that data into your local system.
 17. Perform partitioning on top of the agent column and then on top of that perform bucketing for each partitioning.
