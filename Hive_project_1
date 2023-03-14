@@ -88,5 +88,53 @@ as avg_res from AP group by agent_name limit 10;
 select count(total_chats) from AP where tot_feedback > 0;
 
 15. Total contribution hour for each and every agents weekly basis 
+
+select agent_name,from_unixtime(cast(sum(unix_timestamp(duration,'HH:mm:ss'))/7 as bigint),'HH')
+as avg_cont from ALR group by agent_name limit 10;
+
 16. Perform inner join, left join and right join based on the agent column and after joining the table export that data into your local system.
+
+select * from AP inner join ALR on AP.agent_name = ALR.agent_name; //inner join
+
+select * from AP left outer join ALR on AP.agent_name = ALR.agent_name; //left outer join
+
+select * from AP right outer join ALR on AP.agent_name = ALR.agent_name; //right outer join
+
+
 17. Perform partitioning on top of the agent column and then on top of that perform bucketing for each partitioning.
+
+create table buck_alr
+(
+sl_no int,
+dat string,
+login string,
+logout string,
+duration string
+)
+partitioned by (agent_name string)
+clustered by (sl_no)
+sorted by (sl_no)
+into 2 buckets;
+
+insert overwrite table buck_alr partition(agent_name) select sl_no,dat,login,logout,duration,agent_name
+from alr;
+
+create table buck_ap
+(
+sl_no int,
+dat string,
+total_chats int,
+avg_response string,
+avg_resolution string,
+avg_rating float,
+tot_feedback int
+)
+partitioned by (agent_name string)
+clustered by (sl_no)
+sorted by (sl_no)
+into 2 buckets;
+
+insert overwrite table buck_alr partition(agent_name) select sl_no,dat,total_chats,
+avg_response,avg_resolution,avg_rating,tot_feedback,agent_name
+from ap;
+
